@@ -20,6 +20,6 @@ public class Egg {
     @Column(name="price", nullable = false)
     double price;
     // tentative
-    @Column(name="days_turn", nullable = false)
+    @Transient
     int daysToTurn;
 }

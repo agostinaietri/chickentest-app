@@ -19,6 +19,6 @@ public class Chicken {
     @Column(name="price", nullable = false)
     double price;
     // tentative
-    @Column(name="days_life", nullable = false)
+    @Transient
     int daysToLive;
 }

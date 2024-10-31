@@ -39,7 +39,7 @@ public class FarmerController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteFarmer(@PathVariable Long id) {
         farmerService.deleteFarmer(id);
         return ResponseEntity.noContent().build();
     }

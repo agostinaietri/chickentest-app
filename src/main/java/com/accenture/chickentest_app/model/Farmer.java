@@ -20,6 +20,8 @@ public class Farmer {
     String name;
     @Column(name="balance", nullable = false)
     double balance;
+    @Transient
+    int farmCapacity;
 
 
 }
