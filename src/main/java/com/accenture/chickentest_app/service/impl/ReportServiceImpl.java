@@ -20,6 +20,7 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ChickenRepository chickenRepository;
 
+    /*
     @Override
     public int getChickenAmount() {
         return (int) chickenRepository.count();
@@ -29,6 +30,7 @@ public class ReportServiceImpl implements ReportService {
     public int getEggAmount() {
         return (int) eggRepository.count();
     }
+    */
 
     /*
     @Override
@@ -54,6 +56,7 @@ public class ReportServiceImpl implements ReportService {
     // be called?
 
 
+    /*
     @Override
     public String getReport(Optional<Farmer> id) {
         Optional<Farmer> farmer = farmerService.getFarmer(id);
@@ -61,4 +64,6 @@ public class ReportServiceImpl implements ReportService {
                 + farmer.get().getBalance() + ", chicken count: "
                 + getChickenAmount() + ", egg count: " + getEggAmount();
     }
+
+    */
 }
