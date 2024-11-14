@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "api/v1/report")
@@ -14,9 +15,12 @@ public class ReportController {
 
     @Autowired
     private ReportService reportService;
+    @Autowired
+    private FarmerService farmerService;
 
-    @GetMapping
-    public String getReport(@RequestParam Farmer farmer) {
+    @GetMapping("/report")
+    public String getReport(@RequestParam Long id) {
+        Optional<Farmer> farmer = farmerService.getFarmer(id);
         return reportService.getReport(farmer);
     }
 }
