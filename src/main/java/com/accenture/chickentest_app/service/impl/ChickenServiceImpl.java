@@ -1,9 +1,7 @@
 package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
-import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
-import com.accenture.chickentest_app.repository.FarmerRepository;
 import com.accenture.chickentest_app.service.ChickenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,8 +18,9 @@ public class ChickenServiceImpl implements ChickenService {
     private ChickenRepository chickenRepository;
 
     @Override
-    public void addChicken(Chicken chicken) {
+    public Chicken addChicken(Chicken chicken) {
         chickenRepository.save(chicken);
+        return chicken;
     }
 
     @Override
@@ -38,12 +37,13 @@ public class ChickenServiceImpl implements ChickenService {
     }
 
     @Override
-    public void updateChicken(Long id, Chicken chicken) {
+    public Chicken updateChicken(Long id, Chicken chicken) {
         chickenRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
         chicken.setId(id);
         chickenRepository.save(chicken);
+        return null;
     }
 
     @Override
@@ -53,5 +53,41 @@ public class ChickenServiceImpl implements ChickenService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
 
         chickenRepository.delete(chicken);
+    }
+
+    @Override
+    public void addAllChicken(List<Chicken> chicken) {
+        chickenRepository.saveAll(chicken);
+    }
+
+    //pensás que debería hacerlo endpoint o sólo dejarlo como método del service?
+    @Override
+    public void advanceDays(int daysAdvanced) {
+        List<Chicken> allChicken = chickenRepository.findAll();
+        for(Chicken chicken : allChicken) {
+            chicken.setDaysLived(chicken.getDaysLived()+daysAdvanced);
+        }
+    }
+
+    //acá igual - pensás que debería hacerlo endpoint o sólo dejarlo como
+    // método del service?
+    @Override
+    public void removeDead() {
+        List<Chicken> allChicken = chickenRepository.findAll();
+        for(Chicken chicken : allChicken) {
+            if(chicken.getLifeStatus()) {
+                chickenRepository.delete(chicken);
+            }
+        }
+    }
+
+    @Override
+    public void dayChecker() {
+        List<Chicken> allChicken = chickenRepository.findAll();
+        for(Chicken chicken : allChicken) {
+            if(chicken.getDaysLived() >= chicken.getTotalDays()) {
+                chicken.setLifeStatus(true);
+            }
+        }
     }
 }

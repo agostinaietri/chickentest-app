@@ -1,13 +1,17 @@
 package com.accenture.chickentest_app.Controller;
 
+import com.accenture.chickentest_app.dto.ChickenDTO;
 import com.accenture.chickentest_app.model.Chicken;
 import com.accenture.chickentest_app.service.ChickenService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "api/v1/chicken")
@@ -15,27 +19,40 @@ public class ChickenController {
 
     @Autowired
     private ChickenService chickenService;
+    @Autowired
+    private ModelMapper modelMapper;
 
     @PostMapping("/add")
-    public String addChicken(@RequestBody Chicken chicken) {
+    public ResponseEntity<ChickenDTO> addChicken(@RequestBody ChickenDTO chickenDto) {
+        Chicken chickenRequest = modelMapper.map(chickenDto, Chicken.class);
+
+        Chicken chicken = chickenService.addChicken(chickenRequest);
+
+        ChickenDTO chickenResponse = modelMapper.map(chicken, ChickenDTO.class);
+
         chickenService.addChicken(chicken);
-        return "Chicken successfully added";
+        return new ResponseEntity<ChickenDTO>(chickenResponse, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public List<Chicken> getChickens() {
-        return chickenService.getChickens();
+    public List<ChickenDTO> getChickens() {
+        return chickenService.getChickens().stream().map(chicken -> modelMapper.map(chicken, ChickenDTO.class))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/get")
-    public Optional<Chicken> getChicken(@RequestParam Long id) {
-        return chickenService.getChicken(id);
+    public ResponseEntity<ChickenDTO> getChicken(@RequestParam Long id) {
+        Optional<Chicken> chicken = chickenService.getChicken(id);
+        ChickenDTO chickenResponse = modelMapper.map(chicken, ChickenDTO.class);
+        return ResponseEntity.ok().body(chickenResponse);
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Void> updateChicken(@PathVariable Long id, @RequestBody Chicken chicken) {
-        chickenService.updateChicken(id, chicken);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ChickenDTO> updateChicken(@PathVariable Long id, @RequestBody ChickenDTO chickenDTO) {
+        Chicken chickenRequest = modelMapper.map(chickenDTO, Chicken.class);
+        Chicken chicken = chickenService.updateChicken(id, chickenRequest);
+        ChickenDTO chickenResponse = modelMapper.map(chicken, ChickenDTO.class);
+        return ResponseEntity.ok().body(chickenResponse);
     }
 
     @DeleteMapping("/delete/{id}")

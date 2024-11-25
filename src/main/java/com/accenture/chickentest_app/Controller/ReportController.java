@@ -18,9 +18,10 @@ public class ReportController {
     @Autowired
     private FarmerService farmerService;
 
+    /*
     @GetMapping("/report")
     public String getReport(@RequestParam Long id) {
         Optional<Farmer> farmer = farmerService.getFarmer(id);
         return reportService.getReport(farmer);
-    }
+    }*/
 }

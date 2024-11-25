@@ -20,8 +20,24 @@ public class Farmer {
     String name;
     @Column(name="balance", nullable = false)
     double balance;
+
+    @Transient //esta info es interna, es la que se actualiza con cada transacción
+            //por eso es transient
+            //chequear
+            //conteo total de ganado
+    int cattle;
+    //no debería tener también un número máximo de gallinas?
+    //eso se debe controlar cuando compran/venden
     @Transient
-    int farmCapacity;
+    int chickenQuantity;
+    @Transient
+    int eggQuantity;
 
+    //mínimo de ganado - tal vez se puede handlear mejor
+    @Column(name="min_quantity", nullable=false)
+    int minFarmQuantity;
 
+    //límite granja ganado
+    @Column(name="farm_limit", nullable = false)
+    int farmLimit;
 }
