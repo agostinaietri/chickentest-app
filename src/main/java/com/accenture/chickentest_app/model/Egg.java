@@ -21,5 +21,9 @@ public class Egg {
     double price;
     // tentative
     @Transient
-    int daysToTurn;
+    int daysLived;
+
+    @ManyToOne
+    @JoinColumn(name = "farmer_id")
+    private Farmer farmer;
 }

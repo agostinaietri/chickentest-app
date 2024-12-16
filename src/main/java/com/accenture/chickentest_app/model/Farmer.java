@@ -3,6 +3,9 @@ package com.accenture.chickentest_app.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,24 +23,21 @@ public class Farmer {
     String name;
     @Column(name="balance", nullable = false)
     double balance;
-
-    @Transient //esta info es interna, es la que se actualiza con cada transacción
-            //por eso es transient
-            //chequear
-            //conteo total de ganado
+    // contiene cantidades de ambos gallinas y huevos - cantidad total granja
+    @Column(name="cattle", nullable = false)
     int cattle;
-    //no debería tener también un número máximo de gallinas?
-    //eso se debe controlar cuando compran/venden
     @Transient
     int chickenQuantity;
     @Transient
     int eggQuantity;
-
-    //mínimo de ganado - tal vez se puede handlear mejor
-    @Column(name="min_quantity", nullable=false)
-    int minFarmQuantity;
-
-    //límite granja ganado
-    @Column(name="farm_limit", nullable = false)
+    //límite total granja - no la cantidad actual (cattle)
+    @Column(name="farm_limit")
     int farmLimit;
+
+    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
+    private List<Chicken> chickens = new ArrayList<>();
+    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
+    private List<Egg> eggs = new ArrayList<>();
+
+
 }

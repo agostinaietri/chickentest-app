@@ -3,6 +3,7 @@ package com.accenture.chickentest_app.Controller;
 import com.accenture.chickentest_app.dto.ChickenDTO;
 import com.accenture.chickentest_app.model.Chicken;
 import com.accenture.chickentest_app.service.ChickenService;
+import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,15 +24,20 @@ public class ChickenController {
     private ModelMapper modelMapper;
 
     @PostMapping("/add")
-    public ResponseEntity<ChickenDTO> addChicken(@RequestBody ChickenDTO chickenDto) {
+    public ResponseEntity<String> addChicken(@Valid @RequestBody ChickenDTO chickenDto) {
         Chicken chickenRequest = modelMapper.map(chickenDto, Chicken.class);
 
-        Chicken chicken = chickenService.addChicken(chickenRequest);
+        if(chickenRequest.getDaysLived() >= 15) {
+            return new ResponseEntity<>("The days lived for this Chicken exceed the total lifespan of a Chicken, as Chicken only live 15 days.", HttpStatus.BAD_REQUEST);
+        }
+        if(chickenRequest.getPrice() >= 15) {
+            return new ResponseEntity<>("The Price exceeds the maximum price for Chickens, which is 15", HttpStatus.BAD_REQUEST);
+        }
+        //debería retornar el chicken que añadí?
+        //ChickenDTO chickenResponse = modelMapper.map(chickenDto, ChickenDTO.class);
 
-        ChickenDTO chickenResponse = modelMapper.map(chicken, ChickenDTO.class);
-
-        chickenService.addChicken(chicken);
-        return new ResponseEntity<ChickenDTO>(chickenResponse, HttpStatus.CREATED);
+        chickenService.addChicken(chickenRequest);
+        return ResponseEntity.ok("Chicken added successfully.");
     }
 
     @GetMapping
@@ -48,11 +54,29 @@ public class ChickenController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ChickenDTO> updateChicken(@PathVariable Long id, @RequestBody ChickenDTO chickenDTO) {
+    public ResponseEntity<String> updateChicken(@PathVariable Long id, @Valid @RequestBody ChickenDTO chickenDTO) {
+        /*
         Chicken chickenRequest = modelMapper.map(chickenDTO, Chicken.class);
         Chicken chicken = chickenService.updateChicken(id, chickenRequest);
         ChickenDTO chickenResponse = modelMapper.map(chicken, ChickenDTO.class);
         return ResponseEntity.ok().body(chickenResponse);
+        */
+        if(chickenService.findChickenById(id).isEmpty()) {
+            return new ResponseEntity<>("No chicken with entered id were found.", HttpStatus.BAD_REQUEST);
+        }
+        Chicken chickenRequest = modelMapper.map(chickenDTO, Chicken.class);
+
+        if(chickenRequest.getDaysLived() >= 15) {
+            return new ResponseEntity<>("The days lived for this Chicken exceed the total lifespan of a Chicken, as Chicken only live 15 days.", HttpStatus.BAD_REQUEST);
+        }
+        if(chickenRequest.getPrice() >= 15) {
+            return new ResponseEntity<>("The Price exceeds the maximum price for Chickens, which is 15", HttpStatus.BAD_REQUEST);
+        }
+        //ChickenDTO chickenResponse = modelMapper.map(chickenDto, ChickenDTO.class);
+
+        chickenService.addChicken(chickenRequest);
+        return ResponseEntity.ok("Chicken added successfully.");
+
     }
 
     @DeleteMapping("/delete/{id}")

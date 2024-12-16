@@ -1,6 +1,7 @@
 package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
+import com.accenture.chickentest_app.model.Egg;
 import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
 import com.accenture.chickentest_app.repository.EggRepository;
@@ -61,6 +62,14 @@ public class FarmerServiceImpl implements FarmerService {
     }
 
     @Override
+    public Optional<Farmer> findFarmerById(Long id) {
+        if(!farmerRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        return farmerRepository.findById(id);
+    }
+
+    @Override
     public boolean buyChicken(List<Chicken> chicken, Long farmerId) {
 
         double totalPrice = 0.0;
@@ -73,6 +82,8 @@ public class FarmerServiceImpl implements FarmerService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
 
         if(farmer.getBalance() < totalPrice) {
+            return false;
+        } else if(farmer.getCattle() >= farmer.getFarmLimit()) {
             return false;
         } else {
             //actualiza balance
@@ -99,8 +110,8 @@ public class FarmerServiceImpl implements FarmerService {
                 .findById(farmerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
 
-        //chequea si se tiene suficiente ganado para vender
-        if(farmer.getCattle() < farmer.getMinFarmQuantity()) {
+        //chequea si se tiene suficiente ganado para vender - mínimo: 10% de cattle total
+        if(farmer.getCattle() > (farmer.getCattle() * 0.1)) {
             //actualiza balance
             farmer.setBalance(farmer.getBalance()+totalPrice);
             //actualiza cantidad de gallinas
@@ -109,10 +120,56 @@ public class FarmerServiceImpl implements FarmerService {
             farmer.setCattle(farmer.getCattle() - chickenId.size());
             //elimina las gallinas vendidas
             chickenRepository.deleteAllById(chickenId);
-
             return true;
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public String getReport(Long id, int daysToAdvance) {
+        farmerRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
+        // si llega acá es que existe el granjero
+        Optional<Farmer> farmer = farmerRepository.findById(id);
+
+        // corremos el método para avanzar días
+        advanceDays(id, daysToAdvance);
+
+        return "Report for farmer: " + farmer.get().getName() + ", farmer balance: "
+                + farmer.get().getBalance() + ", chicken count: "
+                + farmer.get().getChickenQuantity() + ", egg count: " + farmer.get().getEggQuantity();
+    }
+
+    public void advanceDays(Long id, int daysToAdvance) {
+        farmerRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
+        // si llega acá es que existe el granjero
+        Optional<Farmer> farmer = farmerRepository.findById(id);
+
+        // expired chicken handling
+        for(Chicken chicken : farmer.get().getChickens()) {
+            chicken.setDaysLived(chicken.getDaysLived()+daysToAdvance);
+            if(chicken.getDaysLived() >= 15) {
+                farmer.get().getChickens().remove(chicken);
+                chickenRepository.delete(chicken);
+            }
+        }
+
+        // egg into chicken transformation handling
+        for(Egg egg : farmer.get().getEggs()) {
+            if(egg.getDaysLived() >= 15) {
+                Chicken newChicken = new Chicken();
+                //newChicken.setFarmer(farmer);
+                //newChicken.setPrice(1);
+                newChicken.setDaysLived(1);
+                farmer.get().getChickens().add(newChicken);
+                chickenRepository.save(newChicken);
+                farmer.get().getEggs().remove(egg);
+                eggRepository.delete(egg);
+            }
         }
     }
 }

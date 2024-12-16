@@ -21,8 +21,14 @@ public interface FarmerService {
 
     void deleteFarmer(Long id);
 
+    Optional<Farmer> findFarmerById(Long id);
+
     boolean buyChicken(List<Chicken> chicken, Long farmerId);
     boolean sellChicken(List<Long> chickenId, Long farmerId);
+
+    String getReport(Long id, int daysToAdvance);
+
+    void advanceDays(Long farmerId, int daysAdvanced);
     //void buyEgg(List<Egg> eggs);
     //void sellEggs(List<int> eggsId);
 }

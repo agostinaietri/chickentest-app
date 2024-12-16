@@ -2,6 +2,7 @@ package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
 import com.accenture.chickentest_app.model.Egg;
+import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
 import com.accenture.chickentest_app.repository.EggRepository;
 import com.accenture.chickentest_app.service.ChickenService;
@@ -45,6 +46,14 @@ public class EggServiceImpl implements EggService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
         egg.setId(id);
         eggRepository.save(egg);
+    }
+
+    @Override
+    public Optional<Egg> findEggById(Long id) {
+        if(!eggRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        return eggRepository.findById(id);
     }
 
     @Override

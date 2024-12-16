@@ -18,9 +18,9 @@ public class ChickenServiceImpl implements ChickenService {
     private ChickenRepository chickenRepository;
 
     @Override
-    public Chicken addChicken(Chicken chicken) {
+    public String addChicken(Chicken chicken) {
         chickenRepository.save(chicken);
-        return chicken;
+        return "Chicken was added successfully.";
     }
 
     @Override
@@ -56,21 +56,27 @@ public class ChickenServiceImpl implements ChickenService {
     }
 
     @Override
+    public Optional<Chicken> findChickenById(Long id) {
+        if(!chickenRepository.existsById(id)) {
+            return Optional.empty();
+        }
+        return chickenRepository.findById(id);
+    }
+
+    @Override
     public void addAllChicken(List<Chicken> chicken) {
         chickenRepository.saveAll(chicken);
     }
-
-    //pensás que debería hacerlo endpoint o sólo dejarlo como método del service?
+    /*
     @Override
-    public void advanceDays(int daysAdvanced) {
+    public void advanceDays(Long farmerId, int daysAdvanced) {
+        List<Chicken> chickenFromFarmer = farmer
         List<Chicken> allChicken = chickenRepository.findAll();
         for(Chicken chicken : allChicken) {
             chicken.setDaysLived(chicken.getDaysLived()+daysAdvanced);
         }
-    }
+    }*/
 
-    //acá igual - pensás que debería hacerlo endpoint o sólo dejarlo como
-    // método del service?
     @Override
     public void removeDead() {
         List<Chicken> allChicken = chickenRepository.findAll();

@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface EggRepository extends JpaRepository<Egg, Long> {
     Egg findAllById(Long l);
+    Egg findEggById(Long id);
 }

@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Service
 public interface ChickenService {
-    Chicken addChicken(Chicken chicken);
+    String addChicken(Chicken chicken);
 
     List<Chicken> getChickens();
 
@@ -17,8 +17,9 @@ public interface ChickenService {
     Chicken updateChicken(Long id, Chicken chicken);
 
     void deleteChicken(Long id);
+    Optional<Chicken> findChickenById(Long id);
     void addAllChicken(List<Chicken> chicken);
-    void advanceDays(int daysAdvanced);
+    //void advanceDays(Long farmerId, int daysAdvanced);
     void removeDead();
     void dayChecker();
 }

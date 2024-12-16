@@ -14,6 +14,7 @@ public interface EggService {
     List<Egg> getEggs();
 
     Optional<Egg> getEgg(Long id);
+    Optional<Egg> findEggById(Long id);
 
     void updateEgg(Long id, Egg egg);
 
