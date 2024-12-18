@@ -23,8 +23,8 @@ public interface FarmerService {
 
     Optional<Farmer> findFarmerById(Long id);
 
-    boolean buyChicken(List<Chicken> chicken, Long farmerId);
-    boolean sellChicken(List<Long> chickenId, Long farmerId);
+    boolean buy(String type, Long farmerId, List<Object> cattle);
+    boolean sell (List<Long> ids, Long farmerId, String type);
 
     String getReport(Long id, int daysToAdvance);
 

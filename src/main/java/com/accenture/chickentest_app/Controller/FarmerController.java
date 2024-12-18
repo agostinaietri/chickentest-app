@@ -87,18 +87,18 @@ public class FarmerController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/buy/{farmerId}")
-    public ResponseEntity<String> buyChicken(@PathVariable Long farmerId, @Valid @RequestBody List<Chicken> chicken) {
-        if(farmerService.buyChicken(chicken, farmerId)) {
-            return ResponseEntity.ok("Chicken purchased successfully.");
+    @PostMapping("/buy/{type}/{farmerId}")
+    public ResponseEntity<String> buy(@PathVariable Long farmerId, @PathVariable String type, @Valid @RequestBody List<Object> cattle) {
+        if(farmerService.buy(type, farmerId, cattle)) {
+            return ResponseEntity.ok("Purchase was successful.");
         } else {
             return ResponseEntity.badRequest().body("Not enough balance to buy or farm capacity exceeded.");
         }
     }
 
-    @DeleteMapping("/sell/{farmerId}")
-    public ResponseEntity<String> sellChicken(@PathVariable Long farmerId, @Valid @RequestBody List<Long> chicken) {
-        if(farmerService.sellChicken(chicken, farmerId)) {
+    @PostMapping("/sell/{type}/{farmerId}")
+    public ResponseEntity<String> sell(@PathVariable Long farmerId, @PathVariable String type, @Valid @RequestBody List<Long> ids) {
+        if(farmerService.sell(ids, farmerId, type)) {
             return ResponseEntity.ok("Chicken sold successfully.");
         } else {
             return ResponseEntity.badRequest().body("Not enough cattle to be able to sell. Please check capacity.");
