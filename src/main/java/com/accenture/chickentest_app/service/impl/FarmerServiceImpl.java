@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class FarmerServiceImpl implements FarmerService {
@@ -72,24 +73,86 @@ public class FarmerServiceImpl implements FarmerService {
     }
 
     @Override
+    public boolean buyChicken(List<Chicken> chicken, Long farmerId) {
+        double totalPrice = 0.0;
+        for (Chicken c : chicken) {
+            totalPrice += c.getPrice();
+        }
+
+        Farmer farmer = farmerRepository
+                .findById(farmerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
+
+        if (farmer.getBalance() < totalPrice) {
+            return false;
+        } else if (farmer.getCattle() >= farmer.getFarmLimit()) {
+            return false;
+        } else {
+            //actualiza balance
+            farmer.setBalance(farmer.getBalance() - totalPrice);
+            //actualiza cantidad de gallinas
+            farmer.setChickenQuantity(chicken.size() + farmer.getChickenQuantity());
+            //actualiza cantidad de ganado total
+            farmer.setCattle(farmer.getCattle() + chicken.size());
+
+            chickenRepository.saveAll(chicken);
+            return true;
+        }
+    }
+
+    @Override
+    public boolean sellChicken(List<Long> chickenId, Long farmerId) {
+        double totalPrice = 0.0;
+        for(Long id : chickenId) {
+            totalPrice += chickenRepository.getById(id).getPrice();
+        }
+
+        Farmer farmer = farmerRepository
+                .findById(farmerId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
+
+        //chequea si se tiene suficiente ganado para vender - mínimo: 10% de cattle total
+        if(farmer.getCattle() > (farmer.getCattle() * 0.1)) {
+            //actualiza balance
+            farmer.setBalance(farmer.getBalance()+totalPrice);
+            //actualiza cantidad de gallinas
+            farmer.setChickenQuantity(chickenId.size()-farmer.getChickenQuantity());
+            //actualiza cantidad ganado total
+            farmer.setCattle(farmer.getCattle() - chickenId.size());
+            //elimina las gallinas vendidas
+            chickenRepository.deleteAllById(chickenId);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /*
+    @Override
     public boolean buy(String type, Long farmerId, List<Object> cattle) {
+
+        System.out.println(cattle);
 
         // variable de return
         boolean result = false;
         double totalPrice = 0.0;
 
         // acumulo el precio total - handleo de tipo chicken
-        if (Objects.equals(type, "chicken")) {
-            for (Object c : cattle) {
-                if(c instanceof Chicken) {
-                    Chicken auxChicken = (Chicken) c;
-                    totalPrice += auxChicken.getPrice();
-                }
+        for (Object c : cattle) {
+            if (c instanceof Chicken) {
+                Chicken auxChicken = (Chicken) c;
+                totalPrice += auxChicken.getPrice();
+            } else if (c instanceof Egg) {
+                Egg auxEgg = (Egg) c;
+                totalPrice += auxEgg.getPrice();
             }
         }
 
+        /*
         // acumulo el precio total - handleo de tipo egg
         if (Objects.equals(type, "egg")) {
+            System.out.println("Egg");
             for (Object c : cattle) {
                 if(c instanceof Egg) {
                     Egg auxEgg = (Egg) c;
@@ -97,6 +160,9 @@ public class FarmerServiceImpl implements FarmerService {
                 }
             }
         }
+        //
+
+        System.out.println(totalPrice);
 
         Farmer farmer = farmerRepository
                 .findById(farmerId)
@@ -122,6 +188,7 @@ public class FarmerServiceImpl implements FarmerService {
                     }
                 }
                 farmer.setBalance(farmer.getBalance() - totalPrice);
+                farmerRepository.save(farmer);
                 chickenRepository.saveAll(chickenAux);
 
                 // se pudo comprar satisfactoriamente
@@ -147,7 +214,9 @@ public class FarmerServiceImpl implements FarmerService {
         }
         return result;
     }
+    */
 
+    /*
     @Override
     public boolean sell(List<Long> ids, Long farmerId, String type) {
 
@@ -197,6 +266,7 @@ public class FarmerServiceImpl implements FarmerService {
 
         return result;
     }
+    */
 
     @Override
     public String getReport(Long id, int daysToAdvance) {
