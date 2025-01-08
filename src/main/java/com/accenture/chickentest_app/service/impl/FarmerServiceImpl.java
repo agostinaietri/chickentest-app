@@ -129,6 +129,11 @@ public class FarmerServiceImpl implements FarmerService {
 
 
     /*
+
+
+
+     */
+    /*
     @Override
     public boolean buy(String type, Long farmerId, List<Object> cattle) {
 
