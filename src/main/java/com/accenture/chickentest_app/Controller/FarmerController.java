@@ -76,8 +76,8 @@ public class FarmerController {
             return new ResponseEntity<>("No farmer with entered id was found.", HttpStatus.BAD_REQUEST);
         }
         Farmer farmerRequest = modelMapper.map(farmerDTO, Farmer.class);
-        farmerService.addFarmer(farmerRequest);
-        return ResponseEntity.ok("Farmer added successfully.");
+        farmerService.updateFarmer(id, farmerRequest);
+        return ResponseEntity.ok("Farmer updated successfully.");
 
     }
 

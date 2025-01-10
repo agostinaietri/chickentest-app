@@ -10,6 +10,7 @@ import com.accenture.chickentest_app.service.FarmerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
@@ -48,11 +49,13 @@ public class FarmerServiceImpl implements FarmerService {
 
     @Override
     public void updateFarmer(Long id, Farmer farmer) {
-        farmerRepository
+        Farmer existingFarmer = farmerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        farmer.setId(id);
-        farmerRepository.save(farmer);
+
+        existingFarmer.setBalance(farmer.getBalance());
+        existingFarmer.setFarmLimit(farmer.getFarmLimit());
+        farmerRepository.save(existingFarmer);
     }
 
     @Override
@@ -73,6 +76,7 @@ public class FarmerServiceImpl implements FarmerService {
     }
 
     @Override
+    @Transactional
     public boolean buyChicken(List<Chicken> chicken, Long farmerId) {
         double totalPrice = 0.0;
         for (Chicken c : chicken) {
@@ -94,8 +98,13 @@ public class FarmerServiceImpl implements FarmerService {
             farmer.setChickenQuantity(chicken.size() + farmer.getChickenQuantity());
             //actualiza cantidad de ganado total
             farmer.setCattle(farmer.getCattle() + chicken.size());
+            for(Chicken c : chicken) {
+                c.setFarmer(farmer);
+                farmer.getChickens().add(c);
+            }
 
             chickenRepository.saveAll(chicken);
+            farmerRepository.save(farmer);
             return true;
         }
     }
@@ -337,6 +346,7 @@ public class FarmerServiceImpl implements FarmerService {
             if(chicken.getDaysLived() >= 15) {
                 farmer.getChickens().remove(chicken);
                 chickenRepository.delete(chicken);
+                farmerRepository.save(farmer);
             }
         }
 

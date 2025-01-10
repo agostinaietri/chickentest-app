@@ -14,7 +14,7 @@ public interface ChickenService {
 
     Optional<Chicken> getChicken(Long id);
 
-    Chicken updateChicken(Long id, Chicken chicken);
+    void updateChicken(Long id, Chicken chicken);
 
     void deleteChicken(Long id);
     Optional<Chicken> findChickenById(Long id);

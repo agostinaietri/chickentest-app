@@ -1,6 +1,7 @@
 package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
+import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
 import com.accenture.chickentest_app.service.ChickenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,13 +38,13 @@ public class ChickenServiceImpl implements ChickenService {
     }
 
     @Override
-    public Chicken updateChicken(Long id, Chicken chicken) {
-        chickenRepository
+    public void updateChicken(Long id, Chicken chicken) {
+        Chicken existingChicken = chickenRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        chicken.setId(id);
-        chickenRepository.save(chicken);
-        return null;
+        existingChicken.setPrice(chicken.getPrice());
+        existingChicken.setDaysLived(chicken.getDaysLived());
+        chickenRepository.save(existingChicken);
     }
 
     @Override
