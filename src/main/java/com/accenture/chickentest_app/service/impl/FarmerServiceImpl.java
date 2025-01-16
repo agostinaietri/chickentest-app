@@ -125,7 +125,7 @@ public class FarmerServiceImpl implements FarmerService {
             //actualiza balance
             farmer.setBalance(farmer.getBalance()+totalPrice);
             //actualiza cantidad de gallinas
-            farmer.setChickenQuantity(chickenId.size()-farmer.getChickenQuantity());
+            farmer.setChickenQuantity(farmer.getChickenQuantity() - chickenId.size());
             //actualiza cantidad ganado total
             farmer.setCattle(farmer.getCattle() - chickenId.size());
             //elimina las gallinas vendidas
@@ -315,15 +315,24 @@ public class FarmerServiceImpl implements FarmerService {
             discardedChickens = true;
         }
 
+        ArrayList<Long> eggId = new ArrayList<>();
+        for(Egg e : farmer.getEggs()) {
+            eggId.add(e.getId());
+        }
+        ArrayList<Long> chickenId = new ArrayList<>();
+        for(Chicken c : farmer.getChickens()) {
+            chickenId.add(c.getId());
+        }
+
         if(discardedChickens) {
             return "Report for farmer: " + farmer.getName() + ", farmer balance: "
                     + farmer.getBalance() + ", chicken count: "
-                    + farmer.getChickenQuantity() + ", egg count: " + farmer.getEggQuantity()
-                    + " ," + excessToRemove + " chickens were discarded, as the capacity of the farm was exceeded.";
+                    + farmer.getChickenQuantity() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggQuantity()
+                    + " [egg ids: (" + eggId + ")], " + excessToRemove + " chickens were discarded, as the capacity of the farm was exceeded.";
         } else {
             return "Report for farmer: " + farmer.getName() + ", farmer balance: "
                     + farmer.getBalance() + ", chicken count: "
-                    + farmer.getChickenQuantity() + ", egg count: " + farmer.getEggQuantity();
+                    + farmer.getChickenQuantity() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggQuantity() + " [egg ids: (" + eggId + ")], ";
         }
     }
 
@@ -341,12 +350,11 @@ public class FarmerServiceImpl implements FarmerService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
 
         // expired chicken handling
+        List<Chicken> chickenRemoval = new ArrayList<>();
         for(Chicken chicken : farmer.getChickens()) {
             chicken.setDaysLived(chicken.getDaysLived()+daysToAdvance);
             if(chicken.getDaysLived() >= 15) {
-                farmer.getChickens().remove(chicken);
-                chickenRepository.delete(chicken);
-                farmerRepository.save(farmer);
+                chickenRemoval.add(chicken);
             }
         }
 
@@ -354,7 +362,7 @@ public class FarmerServiceImpl implements FarmerService {
         for(Egg egg : farmer.getEggs()) {
             if(egg.getDaysLived() >= 15) {
                 Chicken newChicken = new Chicken();
-                //newChicken.setFarmer(farmer);
+                newChicken.setFarmer(farmer);
                 newChicken.setPrice(1);
                 newChicken.setDaysLived(1);
                 farmer.getChickens().add(newChicken);

@@ -26,18 +26,18 @@ public class Farmer {
     // contiene cantidades de ambos gallinas y huevos - cantidad total granja
     @Column(name="cattle", nullable = false)
     int cattle;
-    @Transient
+    @Column(name="chicken_quantity", nullable = false)
     int chickenQuantity;
-    @Transient
+    @Column(name="egg_quantity", nullable = false)
     int eggQuantity;
     //límite total granja - no la cantidad actual (cattle)
     @Column(name="farm_limit")
     int farmLimit;
 
     @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
-    private List<Chicken> chickens = new ArrayList<>();
+    private List<Chicken> chickens;
     @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
-    private List<Egg> eggs = new ArrayList<>();
+    private List<Egg> eggs;
 
 
 }
