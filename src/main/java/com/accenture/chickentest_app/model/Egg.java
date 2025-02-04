@@ -7,8 +7,6 @@ import lombok.*;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@ToString
 @Getter
 @Setter
 @Table(name="eggs")
@@ -19,9 +17,11 @@ public class Egg {
     Long id;
     @Column(name="price", nullable = false)
     double price;
-    // tentative
-    @Transient
+
     int daysLived;
+
+    @Column(name="transformed", nullable = false)
+    boolean transformed;
 
     @ManyToOne
     @JoinColumn(name = "farmer_id")

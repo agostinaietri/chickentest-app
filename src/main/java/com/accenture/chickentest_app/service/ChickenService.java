@@ -19,7 +19,6 @@ public interface ChickenService {
     void deleteChicken(Long id);
     Optional<Chicken> findChickenById(Long id);
     void addAllChicken(List<Chicken> chicken);
-    //void advanceDays(Long farmerId, int daysAdvanced);
     void removeDead();
     void dayChecker();
 }

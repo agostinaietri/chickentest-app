@@ -23,17 +23,15 @@ public interface FarmerService {
 
     Optional<Farmer> findFarmerById(Long id);
 
-    //boolean buy(String type, Long farmerId, List<Object> cattle);
-    //boolean sell (List<Long> ids, Long farmerId, String type);
-
     String getReport(Long id, int daysToAdvance);
 
-    void advanceDays(Long farmerId, int daysAdvanced);
-
+    boolean advanceDays(Long farmerId, int daysAdvanced);
 
     boolean buyChicken(List<Chicken> chicken, Long farmerId);
+
     boolean sellChicken(List<Long> chickenId, Long farmerId);
 
-    //void buyEgg(List<Egg> eggs);
-    //void sellEggs(List<int> eggsId);
+    boolean buyEgg(List<Egg> egg, Long farmerId);
+
+    boolean sellEgg(List<Long> eggId, Long farmerId);
 }

@@ -1,7 +1,6 @@
 package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
-import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
 import com.accenture.chickentest_app.service.ChickenService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,15 +67,6 @@ public class ChickenServiceImpl implements ChickenService {
     public void addAllChicken(List<Chicken> chicken) {
         chickenRepository.saveAll(chicken);
     }
-    /*
-    @Override
-    public void advanceDays(Long farmerId, int daysAdvanced) {
-        List<Chicken> chickenFromFarmer = farmer
-        List<Chicken> allChicken = chickenRepository.findAll();
-        for(Chicken chicken : allChicken) {
-            chicken.setDaysLived(chicken.getDaysLived()+daysAdvanced);
-        }
-    }*/
 
     @Override
     public void removeDead() {

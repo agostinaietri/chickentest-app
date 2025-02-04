@@ -3,6 +3,7 @@ package com.accenture.chickentest_app.Controller;
 import com.accenture.chickentest_app.dto.ChickenDTO;
 import com.accenture.chickentest_app.dto.FarmerDTO;
 import com.accenture.chickentest_app.model.Chicken;
+import com.accenture.chickentest_app.model.Egg;
 import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.service.ChickenService;
 import com.accenture.chickentest_app.service.FarmerService;
@@ -87,7 +88,7 @@ public class FarmerController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/buy/{farmerId}")
+    @PostMapping("/buy/chicken/{farmerId}")
     public ResponseEntity<String> buyChicken(@PathVariable Long farmerId, @Valid @RequestBody List<Chicken> chicken) {
         if(farmerService.buyChicken(chicken, farmerId)) {
             return ResponseEntity.ok("Chicken purchased successfully.");
@@ -96,7 +97,7 @@ public class FarmerController {
         }
     }
 
-    @DeleteMapping("/sell/{farmerId}")
+    @DeleteMapping("/sell/chicken/{farmerId}")
     public ResponseEntity<String> sellChicken(@PathVariable Long farmerId, @Valid @RequestBody List<Long> chicken) {
         if (farmerService.sellChicken(chicken, farmerId)) {
             return ResponseEntity.ok("Chicken sold successfully.");
@@ -104,26 +105,24 @@ public class FarmerController {
             return ResponseEntity.badRequest().body("Not enough cattle to be able to sell. Please check capacity.");
         }
     }
-    /*
-    @PostMapping("/buy/{type}/{farmerId}")
-    public ResponseEntity<String> buy(@PathVariable ("farmerId") Long farmerId, @PathVariable ("type") String type, @Valid @RequestBody List<Object> cattle) {
-        if(farmerService.buy(type, farmerId, cattle)) {
-            return ResponseEntity.ok("Purchase was successful.");
+
+    @PostMapping("/buy/egg/{farmerId}")
+    public ResponseEntity<String> buyEgg(@PathVariable Long farmerId, @Valid @RequestBody List<Egg> egg) {
+        if(farmerService.buyEgg(egg, farmerId)) {
+            return ResponseEntity.ok("Egg purchased successfully.");
         } else {
             return ResponseEntity.badRequest().body("Not enough balance to buy or farm capacity exceeded.");
         }
     }
 
-    @PostMapping("/sell/{type}/{farmerId}")
-    public ResponseEntity<String> sell(@PathVariable Long farmerId, @PathVariable String type, @Valid @RequestBody List<Long> ids) {
-        if(farmerService.sell(ids, farmerId, type)) {
-            return ResponseEntity.ok("Chicken sold successfully.");
+    @DeleteMapping("/sell/egg/{farmerId}")
+    public ResponseEntity<String> sellEgg(@PathVariable Long farmerId, @Valid @RequestBody List<Long> eggs) {
+        if (farmerService.sellEgg(eggs, farmerId)) {
+            return ResponseEntity.ok("Eggs sold successfully.");
         } else {
             return ResponseEntity.badRequest().body("Not enough cattle to be able to sell. Please check capacity.");
         }
     }
-
-    */
 
     @GetMapping("/report/{id}/{daysToAdvance}")
     public String getReport(@PathVariable Long id, @PathVariable int daysToAdvance) {

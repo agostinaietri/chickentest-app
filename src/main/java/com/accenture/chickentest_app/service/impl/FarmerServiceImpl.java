@@ -15,9 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class FarmerServiceImpl implements FarmerService {
@@ -122,13 +120,9 @@ public class FarmerServiceImpl implements FarmerService {
 
         //chequea si se tiene suficiente ganado para vender - mínimo: 10% de cattle total
         if(farmer.getCattle() > (farmer.getCattle() * 0.1)) {
-            //actualiza balance
             farmer.setBalance(farmer.getBalance()+totalPrice);
-            //actualiza cantidad de gallinas
             farmer.setChickenQuantity(farmer.getChickenQuantity() - chickenId.size());
-            //actualiza cantidad ganado total
             farmer.setCattle(farmer.getCattle() - chickenId.size());
-            //elimina las gallinas vendidas
             chickenRepository.deleteAllById(chickenId);
             return true;
         } else {
@@ -136,183 +130,82 @@ public class FarmerServiceImpl implements FarmerService {
         }
     }
 
-
-    /*
-
-
-
-     */
-    /*
     @Override
-    public boolean buy(String type, Long farmerId, List<Object> cattle) {
-
-        System.out.println(cattle);
-
-        // variable de return
-        boolean result = false;
+    @Transactional
+    public boolean buyEgg(List<Egg> eggs, Long farmerId) {
         double totalPrice = 0.0;
-
-        // acumulo el precio total - handleo de tipo chicken
-        for (Object c : cattle) {
-            if (c instanceof Chicken) {
-                Chicken auxChicken = (Chicken) c;
-                totalPrice += auxChicken.getPrice();
-            } else if (c instanceof Egg) {
-                Egg auxEgg = (Egg) c;
-                totalPrice += auxEgg.getPrice();
-            }
+        for (Egg e : eggs) {
+            totalPrice += e.getPrice();
         }
-
-        /*
-        // acumulo el precio total - handleo de tipo egg
-        if (Objects.equals(type, "egg")) {
-            System.out.println("Egg");
-            for (Object c : cattle) {
-                if(c instanceof Egg) {
-                    Egg auxEgg = (Egg) c;
-                    totalPrice += auxEgg.getPrice();
-                }
-            }
-        }
-        //
-
-        System.out.println(totalPrice);
 
         Farmer farmer = farmerRepository
                 .findById(farmerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
 
-        // no hay suficiente balance
         if (farmer.getBalance() < totalPrice) {
-            result = false;
-        // si la capacidad actual supera al límite (chequear si es necesario eliminar esto)
+            return false;
         } else if (farmer.getCattle() >= farmer.getFarmLimit()) {
-            result = false;
-        // chequeamos el type que recibimos - chicken o egg
-        } else if (Objects.equals(type, "chicken")) {
-            // capturamos las gallinas a agregar
-            List<Chicken> chickenAux = new ArrayList<>();
-            if(cattle != null && !cattle.isEmpty()) {
-                for(Object cattleAux : cattle) {
-                    if(cattleAux instanceof Chicken) {
-                        Chicken chicken = (Chicken) cattleAux;
-                        farmer.setChickenQuantity(farmer.getChickenQuantity() + 1);
-                        farmer.setCattle(farmer.getCattle() + 1);
-                        chickenAux.add(chicken);
-                    }
-                }
-                farmer.setBalance(farmer.getBalance() - totalPrice);
-                farmerRepository.save(farmer);
-                chickenRepository.saveAll(chickenAux);
+            return false;
+        } else {
+            //actualiza balance
+            farmer.setBalance(farmer.getBalance() - totalPrice);
+            //actualiza cantidad de huevos
+            farmer.setEggQuantity(eggs.size() + farmer.getEggQuantity());
+            //actualiza cantidad de ganado total
+            farmer.setCattle(farmer.getCattle() + eggs.size());
+            for(Egg e : eggs) {
+                e.setFarmer(farmer);
+                farmer.getEggs().add(e);
+            }
 
-                // se pudo comprar satisfactoriamente
-                result = true;
-            }
-        }  else if (Objects.equals(type, "egg")) {
-            // capturamos los huevos a agregar
-            List<Egg> eggAux = new ArrayList<>();
-            if(cattle != null && !cattle.isEmpty()) {
-                for(Object cattleAux : cattle) {
-                    if(cattleAux instanceof Egg) {
-                        Egg egg = (Egg) cattleAux;
-                        farmer.setChickenQuantity(farmer.getChickenQuantity() + 1);
-                        farmer.setCattle(farmer.getCattle() + 1);
-                        eggAux.add(egg);
-                    }
-                }
-                farmer.setBalance(farmer.getBalance() - totalPrice);
-                eggRepository.saveAll(eggAux);
-                // se pudo comprar satisfactoriamente
-                result = true;
-            }
+            eggRepository.saveAll(eggs);
+            farmerRepository.save(farmer);
+            return true;
         }
-        return result;
     }
-    */
 
-    /*
     @Override
-    public boolean sell(List<Long> ids, Long farmerId, String type) {
-
+    public boolean sellEgg(List<Long> eggsId, Long farmerId) {
         double totalPrice = 0.0;
-
-        for (Long id : ids) {
-            if (Objects.equals(type, "chicken")) {
-                totalPrice += chickenRepository.getById(id).getPrice();
-            }
-            if (Objects.equals(type, "egg")) {
-                totalPrice += eggRepository.getById(id).getPrice();
-            }
+        for(Long id : eggsId) {
+            totalPrice += eggRepository.getById(id).getPrice();
         }
 
         Farmer farmer = farmerRepository
                 .findById(farmerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
 
-        // resultado del método - true si pudo vender, false sino
-        boolean result = false;
-        // chequea si se tiene suficiente ganado para vender - mínimo: 10% de cattle total
-        if (farmer.getCattle() > (farmer.getCattle() * 0.1)) {
-            if (Objects.equals(type, "chicken")) {
-                //actualiza balance
-                farmer.setBalance(farmer.getBalance() + totalPrice);
-                //actualiza cantidad de gallinas
-                farmer.setChickenQuantity(ids.size() - farmer.getChickenQuantity());
-                //actualiza cantidad ganado total
-                farmer.setCattle(farmer.getCattle() - ids.size());
-                //elimina las gallinas vendidas
-                chickenRepository.deleteAllById(ids);
-                result = true;
-            }
-
-            if (Objects.equals(type, "egg")) {
-                //actualiza balance
-                farmer.setBalance(farmer.getBalance() + totalPrice);
-                //actualiza cantidad de huevos
-                farmer.setEggQuantity(ids.size() - farmer.getEggQuantity());
-                //actualiza cantidad ganado total
-                farmer.setCattle(farmer.getCattle() - ids.size());
-                //elimina los huevos vendidos
-                eggRepository.deleteAllById(ids);
-                result = true;
-            }
+        //chequea si se tiene suficiente ganado para vender - mínimo: 10% de cattle total
+        if(farmer.getCattle() > (farmer.getCattle() * 0.1)) {
+            farmer.setBalance(farmer.getBalance()+totalPrice);
+            farmer.setEggQuantity(farmer.getEggQuantity() - eggsId.size());
+            farmer.setCattle(farmer.getCattle() - eggsId.size());
+            eggRepository.deleteAllById(eggsId);
+            return true;
+        } else {
+            return false;
         }
-
-        return result;
     }
-    */
 
     @Override
     public String getReport(Long id, int daysToAdvance) {
-        /*
-        farmerRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        // si llega acá es que existe el granjero
-        Optional<Farmer> farmer = farmerRepository.findById(id);
-        */
 
         Farmer farmer = farmerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
 
-
-        // variable para chequear si se han eliminado gallinas como excedente
         boolean discardedChickens = false;
 
-        // corremos el método para avanzar días
-        advanceDays(id, daysToAdvance);
+        boolean changes = advanceDays(id, daysToAdvance);
 
         int excessToRemove = 0;
-        // chequeamos si la capacidad se excede
         if(farmer.getCattle() >= farmer.getFarmLimit()) {
-            // determino el excedente
             excessToRemove = farmer.getCattle() - farmer.getFarmLimit();
-            // elimino tantas gallinas como tenga de excedente
             for (int i = 0; i < excessToRemove && !farmer.getChickens().isEmpty(); i++) {
                 farmer.getChickens().remove(farmer.getChickens().size() - 1);
+                farmer.setChickenQuantity(farmer.getChickenQuantity() - excessToRemove);
+                discardedChickens = true;
             }
-            discardedChickens = true;
         }
 
         ArrayList<Long> eggId = new ArrayList<>();
@@ -324,42 +217,61 @@ public class FarmerServiceImpl implements FarmerService {
             chickenId.add(c.getId());
         }
 
-        if(discardedChickens) {
+        if(discardedChickens || changes) {
             return "Report for farmer: " + farmer.getName() + ", farmer balance: "
                     + farmer.getBalance() + ", chicken count: "
-                    + farmer.getChickenQuantity() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggQuantity()
-                    + " [egg ids: (" + eggId + ")], " + excessToRemove + " chickens were discarded, as the capacity of the farm was exceeded.";
+                    + farmer.getChickens().size() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggs().size()
+                    + " [egg ids: (" + eggId + ")], " + " farm limit: " + farmer.getFarmLimit()  + " chickens  were discarded, as the capacity of the farm was exceeded or the chicken expired.";
         } else {
             return "Report for farmer: " + farmer.getName() + ", farmer balance: "
                     + farmer.getBalance() + ", chicken count: "
-                    + farmer.getChickenQuantity() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggQuantity() + " [egg ids: (" + eggId + ")], ";
+                    + farmer.getChickens().size() + " [chicken ids: (" + chickenId + ")], egg count: " + farmer.getEggs().size() + " [egg ids: (" + eggId + ")], " + " farm limit: " + farmer.getFarmLimit() + ", " ;
         }
     }
 
-    public void advanceDays(Long id, int daysToAdvance) {
-        /*
-        farmerRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        // si llega acá es que existe el granjero
-        Optional<Farmer> farmer = farmerRepository.findById(id);
-        */
+    @Transactional
+    public boolean advanceDays(Long id, int daysToAdvance) {
+
+        boolean changes = false;
 
         Farmer farmer = farmerRepository
                 .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + id));
 
         // expired chicken handling
-        List<Chicken> chickenRemoval = new ArrayList<>();
+        List<Long> chickenRemoval = new ArrayList<>();
         for(Chicken chicken : farmer.getChickens()) {
-            chicken.setDaysLived(chicken.getDaysLived()+daysToAdvance);
-            if(chicken.getDaysLived() >= 15) {
-                chickenRemoval.add(chicken);
+            chicken.setDaysLived(chicken.getDaysLived() + daysToAdvance);
+            if (chicken.getDaysLived() >= 15) {
+                chickenRemoval.add(chicken.getId());
+            }
+        }
+
+        if(!chickenRemoval.isEmpty()) {
+            System.out.println("Chicken to be deleted: " + chickenRemoval);
+            for(Long chickenId : chickenRemoval) {
+
+                Chicken chickenToRemove = chickenRepository
+                        .findById(chickenId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + chickenId));
+
+                chickenToRemove.setFarmer(null);
+                chickenRepository.deleteById(chickenId);
+                farmer.getChickens().remove(chickenToRemove);
+                changes = true;
             }
         }
 
         // egg into chicken transformation handling
+        List<Long> eggRemoval = new ArrayList<>();
         for(Egg egg : farmer.getEggs()) {
+
+            // si está transformado lo skipeamos
+            if(egg.isTransformed()) {
+                continue;
+            }
+
+            egg.setDaysLived(egg.getDaysLived() + daysToAdvance);
             if(egg.getDaysLived() >= 15) {
                 Chicken newChicken = new Chicken();
                 newChicken.setFarmer(farmer);
@@ -367,9 +279,27 @@ public class FarmerServiceImpl implements FarmerService {
                 newChicken.setDaysLived(1);
                 farmer.getChickens().add(newChicken);
                 chickenRepository.save(newChicken);
-                farmer.getEggs().remove(egg);
-                eggRepository.delete(egg);
+                egg.setTransformed(true);
+                eggRemoval.add(egg.getId());
             }
         }
+
+        if(!eggRemoval.isEmpty()) {
+            for(Long eggId : eggRemoval) {
+
+                Egg eggToRemove = eggRepository
+                        .findById(eggId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + eggId));
+
+                eggToRemove.setFarmer(null);
+                eggRepository.deleteById(eggId);
+                farmer.getEggs().remove(eggToRemove);
+                changes = true;
+            }
+        }
+        //farmerRepository.flush();
+        farmerRepository.save(farmer);
+
+        return changes;
     }
 }
