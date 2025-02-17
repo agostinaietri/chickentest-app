@@ -74,8 +74,8 @@ public class ChickenController {
         }
         //ChickenDTO chickenResponse = modelMapper.map(chickenDto, ChickenDTO.class);
 
-        chickenService.addChicken(chickenRequest);
-        return ResponseEntity.ok("Chicken added successfully.");
+        chickenService.updateChicken(id, chickenRequest);
+        return ResponseEntity.ok("Chicken updated successfully.");
 
     }
 

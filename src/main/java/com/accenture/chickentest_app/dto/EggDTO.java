@@ -22,4 +22,6 @@ public class EggDTO {
     @Max(value = 15, message = "Days lived should be less than 15")
     private int daysLived;
 
+    // cuando se crea un Egg es falso
+    private boolean transformed = false;
 }

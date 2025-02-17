@@ -14,12 +14,11 @@ public interface ChickenService {
 
     Optional<Chicken> getChicken(Long id);
 
-    Chicken updateChicken(Long id, Chicken chicken);
+    void updateChicken(Long id, Chicken chicken);
 
     void deleteChicken(Long id);
     Optional<Chicken> findChickenById(Long id);
     void addAllChicken(List<Chicken> chicken);
-    //void advanceDays(Long farmerId, int daysAdvanced);
     void removeDead();
     void dayChecker();
 }

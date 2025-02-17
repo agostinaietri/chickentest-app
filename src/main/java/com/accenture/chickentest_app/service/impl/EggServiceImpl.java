@@ -2,10 +2,8 @@ package com.accenture.chickentest_app.service.impl;
 
 import com.accenture.chickentest_app.model.Chicken;
 import com.accenture.chickentest_app.model.Egg;
-import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.repository.ChickenRepository;
 import com.accenture.chickentest_app.repository.EggRepository;
-import com.accenture.chickentest_app.service.ChickenService;
 import com.accenture.chickentest_app.service.EggService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,8 +20,9 @@ public class EggServiceImpl implements EggService {
     private EggRepository eggRepository;
 
     @Override
-    public void addEgg(Egg egg) {
+    public String addEgg(Egg egg) {
         eggRepository.save(egg);
+        return "Egg was added successfully.";
     }
 
     @Override
@@ -35,17 +34,27 @@ public class EggServiceImpl implements EggService {
     public Optional<Egg> getEgg(Long id) {
         Egg egg = eggRepository
                 .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + id));
         return Optional.ofNullable(egg);
     }
 
     @Override
     public void updateEgg(Long id, Egg egg) {
-        eggRepository
+        Egg existingEgg = eggRepository
                 .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        egg.setId(id);
-        eggRepository.save(egg);
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + id));
+        existingEgg.setPrice(egg.getPrice());
+        existingEgg.setDaysLived(egg.getDaysLived());
+        eggRepository.save(existingEgg);
+    }
+
+    @Override
+    public void deleteEgg(Long id) {
+        Egg egg = eggRepository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + id));
+
+        eggRepository.delete(egg);
     }
 
     @Override
@@ -54,14 +63,5 @@ public class EggServiceImpl implements EggService {
             return Optional.empty();
         }
         return eggRepository.findById(id);
-    }
-
-    @Override
-    public void deleteEgg(Long id) {
-        Egg egg = eggRepository
-                .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-
-        eggRepository.delete(egg);
     }
 }

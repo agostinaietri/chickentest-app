@@ -37,13 +37,13 @@ public class ChickenServiceImpl implements ChickenService {
     }
 
     @Override
-    public Chicken updateChicken(Long id, Chicken chicken) {
-        chickenRepository
+    public void updateChicken(Long id, Chicken chicken) {
+        Chicken existingChicken = chickenRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
-        chicken.setId(id);
-        chickenRepository.save(chicken);
-        return null;
+        existingChicken.setPrice(chicken.getPrice());
+        existingChicken.setDaysLived(chicken.getDaysLived());
+        chickenRepository.save(existingChicken);
     }
 
     @Override
@@ -67,15 +67,6 @@ public class ChickenServiceImpl implements ChickenService {
     public void addAllChicken(List<Chicken> chicken) {
         chickenRepository.saveAll(chicken);
     }
-    /*
-    @Override
-    public void advanceDays(Long farmerId, int daysAdvanced) {
-        List<Chicken> chickenFromFarmer = farmer
-        List<Chicken> allChicken = chickenRepository.findAll();
-        for(Chicken chicken : allChicken) {
-            chicken.setDaysLived(chicken.getDaysLived()+daysAdvanced);
-        }
-    }*/
 
     @Override
     public void removeDead() {

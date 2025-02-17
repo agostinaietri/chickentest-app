@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChickenRepository extends JpaRepository<Chicken, Long> {
-    //void advanceDays(int daysAdvanced);
 }
