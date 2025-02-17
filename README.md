@@ -19,7 +19,11 @@ _Prerequisites_
 
 - To be able to run this program, you should:
   - Have Windows 10 or above installed
-  - Have an API platform installed like Postman
+  - Have an API platform installed like Postman, to import cURLs, follow these steps:
+    * Open Postman and click on the "Import" button located in the top left corner of the screen. 
+    * In the Import dialogue box, select the "Raw Text" option. 
+    * Paste your cURL command into the text box. 
+    * Click on the "Continue" button, then click the last "Import" button to generate the request in Postman
   - Have Java 17 installed
   - Have a Java IDE installed 
   (be it Intellij, Eclipse...)
