@@ -14,6 +14,9 @@ goals:
   - and finally, I need to be able to see a 
   status report of the farm, including capacity, 
   money and cattle.
+- UML Diagram: 
+![img_2.png](img_2.png)
+- Functional diagram: ![img_1.png](img_1.png)
 ---------------------------------------
 _Prerequisites_
 
