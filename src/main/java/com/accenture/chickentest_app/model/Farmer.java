@@ -10,7 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name="farmers")
+@Table(name="FARMERS")
 public class Farmer {
 
     @Id
