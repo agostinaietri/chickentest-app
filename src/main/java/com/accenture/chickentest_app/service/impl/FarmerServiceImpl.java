@@ -53,6 +53,7 @@ public class FarmerServiceImpl implements FarmerService {
 
         existingFarmer.setBalance(farmer.getBalance());
         existingFarmer.setFarmLimit(farmer.getFarmLimit());
+
         farmerRepository.save(existingFarmer);
     }
 

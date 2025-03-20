@@ -24,4 +24,6 @@ public class FarmerDTO {
     @Min(value = 1, message = "Farm limit should be greater than 5")
     @Max(value = 50, message = "Farm limit value should be less than 50")
     private int farmLimit;
+
+
 }

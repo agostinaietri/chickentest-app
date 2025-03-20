@@ -1,5 +1,6 @@
 package com.accenture.chickentest_app.model;
 
+import com.accenture.chickentest_app.dto.FarmerDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,6 +9,7 @@ import java.util.List;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Getter
 @Setter
 @Table(name="FARMERS")
@@ -29,10 +31,8 @@ public class Farmer {
     @Column(name="farm_limit")
     int farmLimit;
 
-    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
     private List<Chicken> chickens;
-    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy="farmer", cascade = CascadeType.ALL)
     private List<Egg> eggs;
-
-
 }
