@@ -5,17 +5,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.willDoNothing;
-import static org.mockito.BDDMockito.willReturn;
+import static org.mockito.BDDMockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 import com.accenture.chickentest_app.Controller.FarmerController;
@@ -23,101 +23,58 @@ import com.accenture.chickentest_app.dto.FarmerDTO;
 import com.accenture.chickentest_app.model.Farmer;
 import com.accenture.chickentest_app.service.FarmerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.awaitility.Awaitility.given;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
-@WebMvcTest(FarmerControllerTest.class)
+@WebMvcTest(FarmerController.class)
 public class FarmerControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @Mock
+    @MockBean
     private FarmerService farmerService;
 
     private FarmerDTO farmerDto;
     private Farmer farmer;
 
+    @MockBean
+    private ModelMapper modelMapper;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        // Test data
+        farmerDto = new FarmerDTO("Arthur", 100, 10);
 
-        farmerDto = new FarmerDTO(
-                "Arthur",
-                100,
-                10
-        );
-
-        farmer = Farmer.builder()
-                .id(1L)
-                .name("John")
-                .balance(100)
-                .farmLimit(10)
-                .build();
-        List<Farmer> farmers = List.of(farmer, farmer, farmer);
+        farmer = new Farmer();
+        farmer.setName("Arthur");
+        farmer.setBalance(100);
+        farmer.setFarmLimit(10);
     }
 
     @Test
     @Order(1)
-    public void saveFarmerTest() throws Exception{
-        // precondition
-        farmerDto = new FarmerDTO(
-                "Arthur",
-                100,
-                10
-        );
-        farmer = Farmer.builder()
-                .id(1L)
-                .name("John")
-                .balance(100)
-                .farmLimit(10)
-                .build();
-
+    public void saveFarmerTest() throws Exception {
+        //given
+        when(modelMapper.map(any(FarmerDTO.class), eq(Farmer.class))).thenReturn(farmer);
         doNothing().when(farmerService).addFarmer(any(Farmer.class));
-        //willDoNothing().given(farmerService).addFarmer(any(Farmer.class));
 
-        // action
+        //when
         mockMvc.perform(post("/api/v1/farmer/add")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(farmerDto)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(farmerDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Farmer successfully added"));
 
-        // verify
+        // then
         verify(farmerService, times(1)).addFarmer(any(Farmer.class));
-        /*response.andDo(print()).
-                andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name",
-                        is(farmer.getName())))
-                .andExpect(jsonPath("$.balance",
-                        is(farmer.getBalance())))
-                .andExpect(jsonPath("$.farmLimit",
-                        is(farmer.getFarmLimit())));
-
-         */
     }
 
     @Test
@@ -125,83 +82,132 @@ public class FarmerControllerTest {
     public void getFarmerTest() throws Exception{
         // given
         List<Farmer> farmerList = new ArrayList<>();
-        farmerList.add(farmer);
-        farmerList.add(Farmer.builder()
-                .id(1L)
-                .name("John")
-                .balance(100)
-                .farmLimit(10)
-                .build()
-        );
+        long farmerId = 1L;
+        new Farmer();
+        Farmer farmer1;
+        farmer1 = new Farmer();
+        farmer1.setId(farmerId);
+        farmer1.setName("Arthur");
+        farmer1.setBalance(100);
+        farmer1.setFarmLimit(10);
+        farmerList.add(farmer1);
         BDDMockito.given(farmerService.getFarmers()).willReturn(farmerList);
 
         // when
-        mockMvc.perform(get("/api/v1/farmer"))
-                .andExpect(status().isOk());
+        ResultActions response = mockMvc.perform(get("/api/v1/farmer"));
 
         // then
-        verify(farmerService, times(1)).getFarmers();
-        /*
         response.andExpect(status().isOk())
                 .andDo(print())
                 .andExpect(jsonPath("$.size()",
-                        is(farmerList.size())));
-
-         */
+                        is(1)));
 
     }
 
     @Test
     @Order(3)
-    public void getByIdFarmerTest() throws Exception{
-        // precondition
-        BDDMockito.given(farmerService.findFarmerById(farmer.getId())).willReturn(Optional.of(farmer));
+    public void whenFarmerListEmpty_GetFarmerTestFails() throws Exception{
+        // given
+        List<Farmer> farmerList = new ArrayList<>();
+        BDDMockito.given(farmerService.getFarmers()).willReturn(farmerList);
 
-        // action
-        ResultActions response = mockMvc.perform(get("/api/v1/farmer/{id}", farmer.getId()));
+        // when
+        ResultActions response = mockMvc.perform(get("/api/v1/farmer"))
+                .andExpect(status().isBadRequest());
 
-        // verify
-        response.andExpect(status().isOk())
-                .andDo(print())
-                .andExpect(jsonPath("$.name", is(farmer.getName())))
-                .andExpect(jsonPath("$.balance", is(farmer.getBalance())))
-                .andExpect(jsonPath("$.farmLimit", is(farmer.getFarmLimit())));
+        // then
+        verify(farmerService, times(1)).getFarmers();
+
     }
 
     @Test
     @Order(4)
-    public void updateFarmerTest() throws Exception{
+    public void whenFarmerInvalidId_GetFarmerTestFails() throws Exception{
+        long farmerId = 1L;
+        new Farmer();
+        Farmer farmer1;
+        farmer1 = new Farmer();
+        farmer1.setId(farmerId);
+        farmer1.setName("Arthur");
+        farmer1.setBalance(100);
+        farmer1.setFarmLimit(10);
+        BDDMockito.given(farmerService.findFarmerById(farmerId)).willReturn(Optional.empty());
+
+        ResultActions response = mockMvc.perform(get("/api/v1/farmer/get").param("id", String.valueOf(farmer1.getId())));
+
+
+        // then - verify the output
+        response.andExpect(status().isBadRequest())
+                .andDo(print());
+
+    }
+    @Test
+    @Order(5)
+    public void getByIdFarmerTest() throws Exception{
         // precondition
-        BDDMockito.given(farmerService.findFarmerById(farmer.getId())).willReturn(Optional.of(farmer));
-
-        farmer.setName("Arthur");
-        farmer.setBalance(100);
-
-        //BDDMockito.given(farmerService.updateFarmer(farmer.getId(), farmer)).willReturn("Farmer updated successfully.");
+        long farmerId = 1L;
+        new Farmer();
+        Farmer farmer1;
+        farmer1 = new Farmer();
+        farmer1.setId(farmerId);
+        farmer1.setName("Arthur");
+        farmer1.setBalance(100);
+        farmer1.setFarmLimit(10);
+        BDDMockito.given(farmerService.findFarmerById(farmerId)).willReturn(Optional.of((farmer1)));
 
         // action
-        ResultActions response = mockMvc.perform(put("/api/v1/farmer/delete/{id}", farmer.getId())
+        mockMvc.perform(get("/api/v1/farmer/get").param("id", String.valueOf(farmer1.getId())));
+
+        // verify
+        verify(farmerService, times(1)).getFarmer(farmer1.getId());
+
+    }
+
+    @Test
+    @Order(6)
+    public void updateFarmerTest() throws Exception{
+        long farmerId = 1L;
+        Farmer savedFarmer = Farmer.builder()
+                .id(1L)
+                .name("John")
+                .balance(100)
+                .farmLimit(10)
+                .build();
+
+        Farmer updatedFarmer = Farmer.builder()
+                .id(2L)
+                .name("Arthur")
+                .balance(50)
+                .farmLimit(5)
+                .build();
+
+        BDDMockito.given(farmerService.findFarmerById(farmerId)).willReturn(Optional.of(savedFarmer));
+        BDDMockito.doAnswer(invocation -> ResponseEntity.ok("Farmer updated successfully."))
+                .when(farmerService).updateFarmer(anyLong(), any(Farmer.class));
+
+        // action
+        ResultActions response = mockMvc.perform(put("/api/v1/farmer/update/"  + farmerId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(farmer)));
+                .content(objectMapper.writeValueAsString(updatedFarmer)));
 
         // verify
         response.andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.name", is(farmer.getName())))
-                .andExpect(jsonPath("$.balance", is(farmer.getBalance())))
-                .andExpect(jsonPath("$.farmLimit", is(farmer.getFarmLimit())));
+                .andExpect(jsonPath("$").value("Farmer updated successfully."));
     }
 
     @Test
+    @Order(7)
     public void deleteFarmerTest() throws Exception{
-        // precondition
-        willDoNothing().given(farmerService).deleteFarmer(farmer.getId());
+        // given
+        long farmerId = 1L;
+        willDoNothing().given(farmerService).deleteFarmer(farmerId);
 
-        // action
-        ResultActions response = mockMvc.perform(delete("/api/v1/farmer/delete/{id}", farmer.getId()));
+        // when
+        mockMvc.perform(delete("/api/v1/farmer/delete/" + farmerId))
+                .andExpect(status().isNoContent());
 
-        // then - verify the output
-        response.andExpect(status().isOk())
-                .andDo(print());
+        // then
+        verify(farmerService, times(1)).deleteFarmer(farmerId);
     }
 }

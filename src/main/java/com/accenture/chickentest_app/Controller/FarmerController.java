@@ -79,7 +79,6 @@ public class FarmerController {
         Farmer farmerRequest = modelMapper.map(farmerDTO, Farmer.class);
         farmerService.updateFarmer(id, farmerRequest);
         return ResponseEntity.ok("Farmer updated successfully.");
-
     }
 
     @DeleteMapping("/delete/{id}")
