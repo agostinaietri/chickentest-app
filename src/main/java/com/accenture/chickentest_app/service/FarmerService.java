@@ -12,12 +12,13 @@ import java.util.Optional;
 public interface FarmerService {
 
     void addFarmer(Farmer farmer);
+    boolean saveFarmer(Farmer farmer);
 
     List<Farmer> getFarmers();
 
     Optional<Farmer> getFarmer(Long id);
 
-    void updateFarmer(Long id, Farmer farmer);
+    Farmer updateFarmer(Long id, Farmer farmer);
 
     void deleteFarmer(Long id);
 

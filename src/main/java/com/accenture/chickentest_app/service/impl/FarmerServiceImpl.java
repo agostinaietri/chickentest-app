@@ -32,6 +32,11 @@ public class FarmerServiceImpl implements FarmerService {
         farmerRepository.save(farmer);
     }
 
+    // for junit service test
+    @Override
+    public boolean saveFarmer(Farmer farmer) { farmerRepository.save(farmer) ; return true;}
+
+
     @Override
     public List<Farmer> getFarmers() {
         return farmerRepository.findAll();
@@ -46,7 +51,7 @@ public class FarmerServiceImpl implements FarmerService {
     }
 
     @Override
-    public void updateFarmer(Long id, Farmer farmer) {
+    public Farmer updateFarmer(Long id, Farmer farmer) {
         Farmer existingFarmer = farmerRepository
                 .findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
@@ -55,13 +60,14 @@ public class FarmerServiceImpl implements FarmerService {
         existingFarmer.setFarmLimit(farmer.getFarmLimit());
 
         farmerRepository.save(existingFarmer);
+        return existingFarmer;
     }
 
     @Override
     public void deleteFarmer(Long id) {
         Farmer farmer = farmerRepository
                 .findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + id));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid id: " + id));
 
         farmerRepository.delete(farmer);
     }
@@ -79,12 +85,17 @@ public class FarmerServiceImpl implements FarmerService {
     public boolean buyChicken(List<Chicken> chicken, Long farmerId) {
         double totalPrice = 0.0;
         for (Chicken c : chicken) {
+            System.out.println(c.getPrice());
             totalPrice += c.getPrice();
         }
 
         Farmer farmer = farmerRepository
                 .findById(farmerId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Id inválido" + farmerId));
+
+        if(farmer.getChickens() == null) {
+            farmer.setChickens(new ArrayList<>());
+        }
 
         if (farmer.getBalance() < totalPrice) {
             return false;

@@ -1,5 +1,8 @@
 package com.accenture.chickentest_app.controller;
 
+import com.accenture.chickentest_app.model.Chicken;
+import com.accenture.chickentest_app.model.Egg;
+import jakarta.validation.Valid;
 import org.mockito.*;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -27,8 +30,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -209,5 +216,58 @@ public class FarmerControllerTest {
 
         // then
         verify(farmerService, times(1)).deleteFarmer(farmerId);
+    }
+
+    @Test
+    @Order(8)
+    public void sellChickenTest() throws Exception {
+        List<Long> chickenIds = new ArrayList<>();
+
+        Farmer existingFarmer = new Farmer();
+        existingFarmer.setId(1L);
+        existingFarmer.setBalance(500);
+        existingFarmer.setFarmLimit(15);
+        existingFarmer.setCattle(10);
+        existingFarmer.setChickenQuantity(10);
+
+        when(farmerService.sellChicken(anyList(), eq(1L))).thenReturn(true);
+
+        ResultActions response = mockMvc.perform(delete("/api/v1/farmer/sell/chicken/"  + existingFarmer.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chickenIds)));
+
+        response.andExpect(status().is2xxSuccessful())
+                .andExpect(content().string("Chicken sold successfully."))
+                .andDo(print());
+    }
+
+    @Test
+    @Order(8)
+    public void buyChickenTest() throws Exception {
+        long farmerId = 1L;
+        List<Chicken> chickens = Arrays.asList(
+                new Chicken(),
+                new Chicken()
+        );
+        chickens.get(0).setPrice(100);
+        chickens.get(1).setPrice(150);
+
+        Farmer existingFarmer = new Farmer();
+        existingFarmer.setId(1L);
+        existingFarmer.setBalance(500);
+        existingFarmer.setFarmLimit(10);
+        existingFarmer.setCattle(0);
+        existingFarmer.setChickenQuantity(0);
+
+        when(farmerService.buyChicken(anyList(), eq(1L))).thenReturn(true);
+
+        // action
+        ResultActions response = mockMvc.perform(post("/api/v1/farmer/buy/chicken/"  + farmerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(chickens)));
+
+        response.andExpect(status().is2xxSuccessful())
+                .andExpect(content().string("Chicken purchased successfully."))
+                .andDo(print());
     }
 }

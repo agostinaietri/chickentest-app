@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FarmerRepository extends JpaRepository<Farmer, Long> {
     boolean existsByName(String farmerName);
+    boolean existsById(Farmer farmer);
 }

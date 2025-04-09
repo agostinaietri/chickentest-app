@@ -32,7 +32,8 @@ public class FarmerController {
     @PostMapping("/add")
     public String addFarmer(@Valid @RequestBody FarmerDTO farmerDto) {
         Farmer farmerRequest = modelMapper.map(farmerDto, Farmer.class);
-        farmerService.addFarmer(farmerRequest);
+        //farmerService.addFarmer(farmerRequest);
+        farmerService.saveFarmer(farmerRequest);
         return "Farmer successfully added";
     }
 
